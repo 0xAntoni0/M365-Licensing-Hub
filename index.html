@@ -16,7 +16,7 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
         }
-        /* Estilo para Tooltips */
+        /* Estilo para Tooltips de Dashboard */
         .tooltip {
             visibility: hidden;
             width: 240px;
@@ -49,15 +49,48 @@
             border-style: solid;
             border-color: #1e293b transparent transparent transparent;
         }
-        /* Animación suave para cambio de precios */
-        .price-transition {
-            transition: all 0.3s ease-in-out;
+
+        /* Estilos específicos de la pestaña de Actualización 2026 */
+        .table-container {
+            overflow-x: auto;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            background: white;
+            overflow-y: visible;
         }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 10;
+            border-right: 1px solid #e2e8f0;
+        }
+        .check-icon { color: #8b5cf6; }
+        .price-up { color: #ef4444; font-weight: bold; }
+        .price-equal { color: #10b981; font-weight: bold; }
+        .header-gradient { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%); }
+
+        .tooltip-container { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+        .tooltip-content {
+            visibility: hidden; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+            position: absolute; z-index: 100; top: 150%; left: 50%;
+            transform: translateX(-50%) translateY(-10px); width: 180px;
+            background-color: #1e293b; color: #fff; text-align: center; padding: 10px;
+            border-radius: 8px; font-size: 0.75rem; font-weight: normal; line-height: 1.4;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); pointer-events: none;
+        }
+        .tooltip-container:hover .tooltip-content { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+        .tooltip-content::after {
+            content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -6px;
+            border-width: 6px; border-style: solid; border-color: transparent transparent #1e293b transparent;
+        }
+        .feature-card { transition: transform 0.2s; }
+        .feature-card:hover { transform: translateY(-4px); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
 
-    <!-- Cabecera -->
+    <!-- Cabecera Principal -->
     <header class="gradient-bg text-white py-6 px-6 shadow-lg mb-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
             <div>
@@ -75,244 +108,265 @@
         </div>
     </header>
 
-    <!-- Selector de Pestañas (Precios) -->
-    <div class="max-w-7xl mx-auto px-6 mb-8">
-        <div class="flex bg-slate-200 p-1 rounded-xl w-fit shadow-inner">
+    <!-- Selector de Pestañas -->
+    <div class="max-w-7xl mx-auto px-6 mb-8 overflow-x-auto">
+        <div class="flex bg-slate-200 p-1 rounded-xl w-fit shadow-inner gap-1 min-w-max">
             <button onclick="switchView('current')" id="btn-current" class="px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600">
                 <i class="fas fa-calendar-check mr-2"></i>Actuales (Abril 2026)
             </button>
             <button onclick="switchView('july')" id="btn-july" class="px-6 py-2 rounded-lg font-bold text-sm transition-all text-slate-500 hover:text-slate-700">
                 <i class="fas fa-rocket mr-2"></i>Ajuste Julio 2026
             </button>
+            <button onclick="switchView('update')" id="btn-update" class="px-6 py-2 rounded-lg font-bold text-sm transition-all text-slate-500 hover:text-slate-700">
+                <i class="fas fa-info-circle mr-2"></i>Detalle Actualización 2026
+            </button>
         </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-6 pb-20">
 
-        <!-- Cuadro de Información Dinámico -->
-        <div id="info-box" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg shadow-sm transition-all">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-blue-500" id="info-icon"></i>
+        <!-- VISTA DASHBOARD (Actuales / Julio) -->
+        <div id="dashboard-view">
+            <!-- Cuadro de Información Dinámico -->
+            <div id="info-box" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg shadow-sm transition-all">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500" id="info-icon"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-blue-800" id="info-text">
+                            <strong>Precios de Compromiso Anual:</strong> Datos sincronizados con las tarifas oficiales para España (Neto). El plan mensual sin permanencia conlleva un recargo aproximado del 20%.
+                        </p>
+                    </div>
                 </div>
-                <div class="ml-3">
-                    <p class="text-xs text-blue-800" id="info-text">
-                        <strong>Precios de Compromiso Anual:</strong> Datos sincronizados con las tarifas oficiales para España (Neto). El plan mensual sin permanencia conlleva un recargo aproximado del 20%.
-                    </p>
+            </div>
+
+            <!-- Fichas de Comparación -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Apps Web y Móvil -->
+                <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-emerald-400 group cursor-help">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-globe text-emerald-500 text-xl"></i>
+                        <h3 class="font-bold text-sm">Apps Web y Móvil</h3>
+                    </div>
+                    <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
+                        <span>Plan</span> <span>Acceso</span>
+                    </div>
+                    <div class="space-y-2 text-xs" id="web-apps-list"></div>
+                    <div class="tooltip"><b>F1/F3/Basic:</b> Optimizadas para uso en nube. Incluyen aplicaciones móviles completas para iOS/Android y versiones web.</div>
+                </div>
+
+                <!-- Apps Locales -->
+                <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-orange-400 group cursor-help">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-desktop text-orange-500 text-xl"></i>
+                        <h3 class="font-bold text-sm">Apps de Escritorio</h3>
+                    </div>
+                    <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
+                        <span>Plan</span> <span>Diferencial</span>
+                    </div>
+                    <div class="space-y-2 text-xs" id="apps-list"></div>
+                    <div class="tooltip"><b>Incluye Access:</b> Word, Excel, PowerPoint, Outlook y Access (solo PC). Permite el trabajo offline y derechos VDI.</div>
+                </div>
+
+                <!-- Correo y Archivado -->
+                <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-blue-400 group cursor-help">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-envelope-open-text text-blue-500 text-xl"></i>
+                        <h3 class="font-bold text-sm">Correo y Archivado</h3>
+                    </div>
+                    <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
+                        <span>Plan</span> <span>Buzón + Arch</span>
+                    </div>
+                    <div class="space-y-2 text-xs" id="mail-list"></div>
+                    <div class="tooltip"><b>Archivado 1.5 TB:</b> Autoexpandible en planes E3/E5. Ideal para auditorías y cumplimiento normativo.</div>
+                </div>
+
+                <!-- Seguridad e Identidad -->
+                <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-purple-400 group cursor-help">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-user-shield text-purple-500 text-xl"></i>
+                        <h3 class="font-bold text-sm">Entra ID & Intune</h3>
+                    </div>
+                    <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
+                        <span>Plan</span> <span>Seguridad / MDM</span>
+                    </div>
+                    <div class="space-y-2 text-xs" id="security-list"></div>
+                    <div class="tooltip"><b>Entra ID P1/P2:</b> Acceso Condicional.<br><b>Intune:</b> Control total de dispositivos corporativos y personales (BYOD).</div>
+                </div>
+            </div>
+
+            <!-- Tabla Matriz -->
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden mb-10">
+                <div class="p-6 border-b bg-slate-50/50 flex justify-between items-center">
+                    <h2 class="text-xl font-bold" id="matrix-title">Matriz de Decisión - Precios Actuales</h2>
+                    <div class="text-xs bg-slate-800 text-white px-3 py-1 rounded-full font-bold uppercase tracking-widest">Sin IVA / Sin IGIC</div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                            <tr>
+                                <th class="p-4">Licencia</th>
+                                <th class="p-4 text-center">Office Local</th>
+                                <th class="p-4 text-center">Buzón / Arch</th>
+                                <th class="p-4 text-center border-l bg-purple-50/30">Entra ID</th>
+                                <th class="p-4 text-center bg-purple-50/30">Intune</th>
+                                <th class="p-4 text-right border-l bg-blue-50/30">Sin Teams</th>
+                                <th class="p-4 text-right bg-blue-100 font-bold text-blue-900" id="header-teams">Con Teams</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main-comparison-table" class="divide-y"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Fichas de Comparación -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            
-            <!-- Apps Web y Móvil -->
-            <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-emerald-400 group cursor-help">
-                <div class="flex items-center gap-3 mb-3">
-                    <i class="fas fa-globe text-emerald-500 text-xl"></i>
-                    <h3 class="font-bold text-sm">Apps Web y Móvil</h3>
-                </div>
-                <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
-                    <span>Plan</span> <span>Acceso</span>
-                </div>
-                <div class="space-y-2 text-xs" id="web-apps-list"></div>
-                <div class="tooltip">
-                    <b>F1/F3/Basic:</b> Optimizadas para uso en nube. Incluyen aplicaciones móviles completas para iOS/Android y versiones web.
-                </div>
+        <!-- VISTA ACTUALIZACIÓN 2026 (Proporcionada) -->
+        <div id="update-view" class="hidden">
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Consolidación de Capacidades 2026</h2>
+                <p class="text-slate-600">Referencia detallada de mejoras en IA, Seguridad y Almacenamiento.</p>
             </div>
 
-            <!-- Apps Locales -->
-            <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-orange-400 group cursor-help">
-                <div class="flex items-center gap-3 mb-3">
-                    <i class="fas fa-desktop text-orange-500 text-xl"></i>
-                    <h3 class="font-bold text-sm">Apps de Escritorio</h3>
-                </div>
-                <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
-                    <span>Plan</span> <span>Diferencial</span>
-                </div>
-                <div class="space-y-2 text-xs" id="apps-list"></div>
-                <div class="tooltip">
-                    <b>Incluye Access:</b> Word, Excel, PowerPoint, Outlook y Access (solo PC). Permite el trabajo offline y derechos VDI.
-                </div>
-            </div>
-
-            <!-- Correo y Archivado -->
-            <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-blue-400 group cursor-help">
-                <div class="flex items-center gap-3 mb-3">
-                    <i class="fas fa-envelope-open-text text-blue-500 text-xl"></i>
-                    <h3 class="font-bold text-sm">Correo y Archivado</h3>
-                </div>
-                <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
-                    <span>Plan</span> <span>Buzón + Arch</span>
-                </div>
-                <div class="space-y-2 text-xs" id="mail-list"></div>
-                <div class="tooltip">
-                    <b>Archivado 1.5 TB:</b> Autoexpandible en planes E3/E5. Ideal para auditorías y cumplimiento normativo.
-                </div>
-            </div>
-
-            <!-- Seguridad e Identidad -->
-            <div class="glass-card p-5 rounded-2xl shadow-sm border-t-4 border-purple-400 group cursor-help">
-                <div class="flex items-center gap-3 mb-3">
-                    <i class="fas fa-user-shield text-purple-500 text-xl"></i>
-                    <h3 class="font-bold text-sm">Entra ID & Intune</h3>
-                </div>
-                <div class="text-[10px] text-slate-400 mb-2 flex justify-between font-bold uppercase">
-                    <span>Plan</span> <span>Seguridad / MDM</span>
-                </div>
-                <div class="space-y-2 text-xs" id="security-list"></div>
-                <div class="tooltip">
-                    <b>Entra ID P1/P2:</b> Acceso Condicional.<br><b>Intune:</b> Control total de dispositivos corporativos y personales (BYOD).
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabla Detallada -->
-        <div class="glass-card rounded-2xl shadow-xl overflow-hidden mb-10">
-            <div class="p-6 border-b bg-slate-50/50 flex justify-between items-center">
-                <h2 class="text-xl font-bold" id="matrix-title">Matriz de Decisión - Precios Actuales</h2>
-                <div class="text-xs bg-slate-800 text-white px-3 py-1 rounded-full font-bold uppercase tracking-widest">Sin IVA / Sin IGIC</div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-                        <tr>
-                            <th class="p-4">Licencia</th>
-                            <th class="p-4 text-center">Office Local</th>
-                            <th class="p-4 text-center">Buzón / Arch</th>
-                            <th class="p-4 text-center border-l bg-purple-50/30">Entra ID</th>
-                            <th class="p-4 text-center bg-purple-50/30">Intune</th>
-                            <th class="p-4 text-right border-l bg-blue-50/30">Sin Teams</th>
-                            <th class="p-4 text-right bg-blue-100 font-bold text-blue-900" id="header-teams">Con Teams</th>
+            <div class="table-container mb-12">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="header-gradient text-white text-left">
+                            <th class="p-4 sticky-col header-gradient min-w-[200px] z-30">Licencia</th>
+                            <th class="p-4 text-center">Precio Actual</th>
+                            <th class="p-4 text-center">Precio Julio 2026</th>
+                            <th class="p-4 text-center border-l border-white/20">
+                                <div class="tooltip-container cursor-help"><span>Copilot Chat</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">IA generativa con acceso a buzón, calendario y agentes de Office.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>Seguridad IA</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Controles empresariales para gestionar el uso de Copilot.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>Check URL</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Protección en tiempo real contra sitios maliciosos.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>+50GB Email</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Incremento hasta 100GB total de buzón.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>Defender O365</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Protección avanzada contra phishing y malware.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>Intune</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Remote Help y Advanced Analytics.</div></div>
+                            </th>
+                            <th class="p-4 text-center">
+                                <div class="tooltip-container cursor-help"><span>Sec Copilot</span> <i class="fas fa-info-circle text-xs opacity-70"></i><div class="tooltip-content">Asistente de IA especializado para seguridad.</div></div>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody id="main-comparison-table" class="divide-y">
-                        <!-- Generado por JS -->
+                    <tbody class="text-slate-700">
+                        <tr class="border-b hover:bg-slate-50 transition-colors bg-purple-50/30"><td class="p-4 font-bold sticky-col">M365 F1</td><td class="p-4 text-center">$2.25</td><td class="p-4 text-center price-up">$3.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors bg-purple-50/30"><td class="p-4 font-bold sticky-col">M365 F3</td><td class="p-4 text-center">$8.00</td><td class="p-4 text-center price-up">$10.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors"><td class="p-4 font-bold sticky-col">Business Basic</td><td class="p-4 text-center">$6.00</td><td class="p-4 text-center price-up">$7.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors bg-slate-50/50"><td class="p-4 font-bold sticky-col">Business Standard</td><td class="p-4 text-center">$12.50</td><td class="p-4 text-center price-up">$14.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors"><td class="p-4 font-bold sticky-col">Business Premium</td><td class="p-4 text-center">$22.00</td><td class="p-4 text-center price-equal">$22.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors bg-slate-50/50"><td class="p-4 font-bold sticky-col">M365 E3</td><td class="p-4 text-center">$36.00</td><td class="p-4 text-center price-up">$39.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td></tr>
+                        <tr class="border-b hover:bg-slate-50 transition-colors"><td class="p-4 font-bold sticky-col">M365 E5</td><td class="p-4 text-center">$57.00</td><td class="p-4 text-center price-up">$60.00</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center">-</td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td><td class="p-4 text-center"><i class="fas fa-circle check-icon"></i></td></tr>
                     </tbody>
                 </table>
             </div>
-        </div>
 
+            <!-- Tarjetas de Detalle -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-comment-dots"></i><h3>Copilot Chat</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">IA generativa avanzada con acceso a buzón y calendario. Permite crear borradores y automatizar tareas en Office.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-user-shield"></i><h3>Seguridad IA</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Herramientas de control empresarial para gestionar permisos y asegurar que los datos no se filtren.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-link"></i><h3>Check URL</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Escaneo en tiempo real de enlaces en Outlook o Teams para prevenir estafas y phishing instantáneamente.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-hdd"></i><h3>+50GB Email</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Ampliación de buzón de 50GB a 100GB en planes compatibles, eliminando límites de espacio histórico.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-shield-halved"></i><h3>Defender O365 P1</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Capa superior de protección con "Safe Attachments" para analizar archivos sospechosos en un entorno seguro.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-laptop-code"></i><h3>Microsoft Intune</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Añade <strong>Remote Help</strong> y <strong>Advanced Analytics</strong> para soporte remoto seguro y predicción de fallos.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-3">
+                    <div class="flex items-center gap-3 mb-3 text-purple-700 font-bold"><i class="fas fa-bolt"></i><h3>Microsoft Security Copilot</h3></div>
+                    <p class="text-slate-600 text-sm leading-relaxed">Exclusivo E5. Asistente de IA para seguridad que resume ataques complejos y genera scripts de respuesta inmediata.</p>
+                </div>
+            </div>
+
+            <footer class="bg-slate-100 p-6 rounded-xl border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-2">Nota sobre Precios en esta sección:</h3>
+                <p class="text-slate-600 text-sm">Los precios indicados en esta comparativa corresponden a USD (Dólares). Los cambios de capacidades se integrarán globalmente.</p>
+            </footer>
+        </div>
     </main>
 
-    <footer class="text-center py-10 text-slate-400 text-sm">
-        Precios oficiales NCE (Compromiso Anual). Datos de mercado para España Abril 2026.
+    <footer class="text-center py-10 text-slate-400 text-sm border-t">
+        Dashboard Técnico 2026 &bull; Basado en información oficial de Microsoft.
     </footer>
 
     <script>
-        // Precios base actualizados (Sin Teams) y Add-on: [Actual, Julio2026]
         const licenses = [
-            { 
-                name: "M365 F1", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/f1",
-                apps: "Solo Web/Móvil", 
-                mail: "2 GB", 
-                archive: "❌",
-                entraID: "Plan 1",
-                intune: "✅ Si",
-                priceBase: [1.50, 1.70],
-                teamsAddon: 0.40,
-                type: "FrontLine"
-            },
-            { 
-                name: "M365 F3", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/f3",
-                apps: "Solo Web/Móvil", 
-                mail: "2 GB", 
-                archive: "❌",
-                entraID: "Plan 1",
-                intune: "✅ Si",
-                priceBase: [6.00, 6.60],
-                teamsAddon: 0.90, // Resulta en 6.90 con Teams según web oficial
-                type: "FrontLine"
-            },
-            { 
-                name: "Business Basic", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-basic",
-                apps: "Solo Web/Móvil", 
-                mail: "50 GB", 
-                archive: "50 GB",
-                entraID: "Gratis",
-                intune: "❌ No",
-                priceBase: [5.10, 5.60],
-                teamsAddon: 0.50, // 5.60 total
-                type: "Business"
-            },
-            { 
-                name: "Business Standard", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-standard",
-                apps: "✅ Si + Access", 
-                mail: "50 GB", 
-                archive: "50 GB",
-                entraID: "Gratis",
-                intune: "❌ No",
-                priceBase: [8.00, 8.80],
-                teamsAddon: 2.80, // 10.80 total
-                type: "Business"
-            },
-            { 
-                name: "Business Premium", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-premium",
-                apps: "✅ Si + Access", 
-                mail: "50 GB", 
-                archive: "50 GB",
-                entraID: "Plan 1",
-                intune: "✅ Si",
-                priceBase: [16.30, 17.90],
-                teamsAddon: 2.80, // 19.10 total
-                type: "Business"
-            },
-            { 
-                name: "Microsoft 365 E3", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/e3",
-                apps: "✅ Si + Access", 
-                mail: "100 GB", 
-                archive: "✅ 1.5 TB",
-                entraID: "Plan 1",
-                intune: "✅ Si",
-                priceBase: [27.50, 30.50],
-                teamsAddon: 7.40, // 27.50 + 7.40 = 34.90 total
-                type: "Enterprise"
-            },
-            { 
-                name: "Microsoft 365 E5", 
-                url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/e5",
-                apps: "✅ Si + Access", 
-                mail: "100 GB", 
-                archive: "✅ 1.5 TB",
-                entraID: "Plan 2",
-                intune: "✅ Si",
-                priceBase: [47.90, 53.00],
-                teamsAddon: 7.30, // 55.20 total
-                type: "Enterprise"
-            }
+            { name: "M365 F1", url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/f1", apps: "Solo Web/Móvil", mail: "2 GB", archive: "❌", entraID: "Plan 1", intune: "✅ Si", priceBase: [1.50, 1.70], teamsAddon: 0.40, type: "FrontLine" },
+            { name: "M365 F3", url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/f3", apps: "Solo Web/Móvil", mail: "2 GB", archive: "❌", entraID: "Plan 1", intune: "✅ Si", priceBase: [6.00, 6.60], teamsAddon: 0.90, type: "FrontLine" },
+            { name: "Business Basic", url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-basic", apps: "Solo Web/Móvil", mail: "50 GB", archive: "50 GB", entraID: "Gratis", intune: "❌ No", priceBase: [5.10, 5.60], teamsAddon: 0.50, type: "Business" },
+            { name: "Business Standard", url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-standard", apps: "✅ Si + Access", mail: "50 GB", archive: "50 GB", entraID: "Gratis", intune: "❌ No", priceBase: [8.00, 8.80], teamsAddon: 2.80, type: "Business" },
+            { name: "Business Premium", url: "https://www.microsoft.com/es-es/microsoft-365/business/microsoft-365-business-premium", apps: "✅ Si + Access", mail: "50 GB", archive: "50 GB", entraID: "Plan 1", intune: "✅ Si", priceBase: [16.30, 17.90], teamsAddon: 2.80, type: "Business" },
+            { name: "Microsoft 365 E3", url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/microsoft-365-e3", apps: "✅ Si + Access", mail: "100 GB", archive: "✅ 1.5 TB", entraID: "Plan 1", intune: "✅ Si", priceBase: [27.50, 30.50], teamsAddon: 7.40, type: "Enterprise" },
+            { name: "Microsoft 365 E5", url: "https://www.microsoft.com/es-es/microsoft-365/enterprise/e5", apps: "✅ Si + Access", mail: "100 GB", archive: "✅ 1.5 TB", entraID: "Plan 2", intune: "✅ Si", priceBase: [47.90, 53.00], teamsAddon: 7.30, type: "Enterprise" }
         ];
 
         let currentView = 'current';
 
         window.switchView = function(view) {
             currentView = view;
-            
             const btnCurrent = document.getElementById('btn-current');
             const btnJuly = document.getElementById('btn-july');
-            
-            if(view === 'current') {
-                btnCurrent.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600";
-                btnJuly.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all text-slate-500 hover:text-slate-700";
-                document.getElementById('sync-label').innerText = "Tarifas Compromiso Anual";
-                document.getElementById('matrix-title').innerText = "Matriz de Decisión - Precios Actuales";
-                document.getElementById('info-box').className = "bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg shadow-sm";
-                document.getElementById('info-text').innerHTML = "<strong>Precios Netos:</strong> Estás visualizando los precios vigentes <b>sin IVA/IGIC</b> con compromiso anual.";
-            } else {
-                btnJuly.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600";
-                btnCurrent.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all text-slate-500 hover:text-slate-700";
-                document.getElementById('sync-label').innerText = "Ajuste NCE Julio 2026";
-                document.getElementById('matrix-title').innerText = "Matriz de Decisión - Previsión Julio 2026";
-                document.getElementById('info-box').className = "bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg shadow-sm";
-                document.getElementById('info-text').innerHTML = "<strong>Subida Programada (Julio):</strong> Previsión del ajuste de tarifas de Microsoft proyectada para el tercer trimestre de 2026.";
-            }
+            const btnUpdate = document.getElementById('btn-update');
+            const dashView = document.getElementById('dashboard-view');
+            const updateView = document.getElementById('update-view');
+            const syncLabel = document.getElementById('sync-label');
 
-            render();
+            // Reset buttons
+            [btnCurrent, btnJuly, btnUpdate].forEach(b => {
+                b.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all text-slate-500 hover:text-slate-700";
+            });
+
+            if(view === 'update') {
+                btnUpdate.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600";
+                dashView.classList.add('hidden');
+                updateView.classList.remove('hidden');
+                syncLabel.innerText = "Detalle Técnico 2026";
+            } else {
+                dashView.classList.remove('hidden');
+                updateView.classList.add('hidden');
+                const infoBox = document.getElementById('info-box');
+                const infoText = document.getElementById('info-text');
+                const matrixTitle = document.getElementById('matrix-title');
+
+                if(view === 'current') {
+                    btnCurrent.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600";
+                    syncLabel.innerText = "Tarifas Compromiso Anual";
+                    matrixTitle.innerText = "Matriz de Decisión - Precios Actuales";
+                    infoBox.className = "bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg shadow-sm";
+                    infoText.innerHTML = "<strong>Precios Netos:</strong> Estás visualizando los precios vigentes <b>sin IVA/IGIC</b> con compromiso anual.";
+                } else {
+                    btnJuly.className = "px-6 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600";
+                    syncLabel.innerText = "Ajuste NCE Julio 2026";
+                    matrixTitle.innerText = "Matriz de Decisión - Previsión Julio 2026";
+                    infoBox.className = "bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg shadow-sm";
+                    infoText.innerHTML = "<strong>Subida Programada (Julio):</strong> Previsión del ajuste de tarifas de Microsoft proyectada para el tercer trimestre de 2026.";
+                }
+                render();
+            }
         }
 
         function render() {
@@ -321,59 +375,44 @@
             const webAppsDiv = document.getElementById('web-apps-list');
             const mailDiv = document.getElementById('mail-list');
             const secDiv = document.getElementById('security-list');
-
-            if (!table) return;
+            if (!table || currentView === 'update') return;
 
             table.innerHTML = "";
-            appsDiv.innerHTML = "";
-            webAppsDiv.innerHTML = "";
-            mailDiv.innerHTML = "";
-            secDiv.innerHTML = "";
+            appsDiv.innerHTML = ""; webAppsDiv.innerHTML = "";
+            mailDiv.innerHTML = ""; secDiv.innerHTML = "";
 
             const priceIdx = currentView === 'current' ? 0 : 1;
-
             licenses.forEach(l => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50 transition price-transition";
                 let typeColor = l.type === "FrontLine" ? "text-emerald-600" : (l.type === "Enterprise" ? "text-blue-600" : "text-slate-500");
-                
                 const base = l.priceBase[priceIdx];
                 const total = (base + l.teamsAddon).toFixed(2);
+                let entraContent = l.entraID === "Gratis" ? '<i class="fas fa-times text-slate-300"></i>' : l.entraID;
+                let entraColor = l.entraID === "Plan 2" ? "text-purple-700 font-bold" : (l.entraID === "Plan 1" ? "text-purple-500 font-semibold" : "");
 
                 row.innerHTML = `
-                    <td class="p-4">
-                        <a href="${l.url}" target="_blank" class="font-bold text-slate-700 hover:text-blue-600 hover:underline flex items-center gap-2">
-                            ${l.name}
-                            <i class="fas fa-external-link-alt text-[10px] opacity-30"></i>
-                        </a>
-                        <div class="text-[10px] uppercase tracking-wider ${typeColor}">${l.type}</div>
-                    </td>
+                    <td class="p-4"><a href="${l.url}" target="_blank" class="font-bold text-slate-700 hover:text-blue-600 hover:underline flex items-center gap-2">${l.name} <i class="fas fa-external-link-alt text-[10px] opacity-30"></i></a><div class="text-[10px] uppercase tracking-wider ${typeColor}">${l.type}</div></td>
                     <td class="p-4 text-center">${l.apps.includes('✅') ? '<span class="text-green-600 font-semibold text-xs">Incluido</span>' : '<span class="text-orange-500 text-[10px]">❌</span>'}</td>
                     <td class="p-4 text-center text-xs font-medium">${l.mail} <br> <span class="text-[9px] text-slate-400">${l.archive}</span></td>
-                    <td class="p-4 text-center border-l bg-purple-50/10 text-purple-600 font-semibold">${l.entraID}</td>
-                    <td class="p-4 text-center bg-purple-50/10">${l.intune.includes('✅') ? '<i class="fas fa-check text-purple-600"></i>' : '<i class="fas fa-times text-slate-200"></i>'}</td>
+                    <td class="p-4 text-center border-l bg-purple-50/10 ${entraColor}">${entraContent}</td>
+                    <td class="p-4 text-center bg-purple-50/10">${l.intune.includes('✅') ? '<i class="fas fa-check text-purple-600"></i>' : '<i class="fas fa-times text-slate-300"></i>'}</td>
                     <td class="p-4 text-right border-l bg-blue-50/10 font-mono text-slate-500">${base.toFixed(2)}€</td>
                     <td class="p-4 text-right bg-blue-100/50 font-mono font-bold text-blue-900">${total}€</td>
                 `;
                 table.appendChild(row);
 
-                // Tarjetas superiores
                 if (!l.apps.includes('✅')) {
                     webAppsDiv.innerHTML += `<div class="flex justify-between border-b border-emerald-50 pb-1"><span>${l.name}</span> <span class="text-emerald-600 font-bold">${base.toFixed(2)}€</span></div>`;
                 } else {
                     appsDiv.innerHTML += `<div class="flex justify-between border-b border-orange-50 pb-1"><span>${l.name}</span> <span class="text-orange-600 font-bold">${base.toFixed(2)}€</span></div>`;
                 }
-
                 mailDiv.innerHTML += `<div class="flex justify-between border-b border-blue-50 pb-1"><span>${l.name}</span> <span class="font-bold">${l.mail}</span></div>`;
-                
                 let secTag = `${l.entraID.replace('Plan ', 'P')}${l.intune === '✅ Si' ? '+INT' : ''}`;
                 secDiv.innerHTML += `<div class="flex justify-between border-b border-purple-50 pb-1"><span>${l.name}</span> <span class="text-purple-700 font-bold">${secTag}</span></div>`;
             });
         }
-
-        window.onload = function() {
-            render();
-        }
+        window.onload = function() { render(); }
     </script>
 </body>
 </html>
